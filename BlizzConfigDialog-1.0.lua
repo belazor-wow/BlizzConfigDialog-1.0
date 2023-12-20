@@ -37,11 +37,11 @@ end
 
 -- Picks the first non-nil value and returns it
 local function pickfirstset(...)
-  for i = 1, select("#", ...) do
-    if select(i,...) ~= nil then
-      return select(i, ...)
-    end
-  end
+	for i = 1, select("#", ...) do
+		if select(i,...) ~= nil then
+			return select(i, ...)
+		end
+	end
 end
 
 -- Gets an option from a given group, checking plugins
@@ -332,9 +332,9 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					local defaultValue = GetOptionsMemberValue("defaultValue", v, options, path, appName)
 
 					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
-                    Settings.CreateCheckBox(category, setting, desc)
-                    Settings.SetOnValueChangedCallback(k, OnSettingChanged)
-                    setting:SetValue(value)
+					Settings.CreateCheckBox(category, setting, desc)
+					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValue(value)
 
 				elseif v.type == "range" then
 					-- TODO
@@ -346,17 +346,17 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					local values = GetOptionsMemberValue("values", v, options, path, appName)
 
 					local function GetOptions()
-                        local container = Settings.CreateControlTextContainer()
-                        for optionsKey, optionsValue in pairs(values) do
-                            container:Add(optionsKey, optionsValue)
-                        end
-                        return container:GetData()
-                    end
-
-                    local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
-                    Settings.CreateDropDown(category, setting, GetOptions, desc)
-                    Settings.SetOnValueChangedCallback(k, OnSettingChanged)
-                    setting:SetValue(value)
+						local container = Settings.CreateControlTextContainer()
+						for optionsKey, optionsValue in pairs(values) do
+							container:Add(optionsKey, optionsValue)
+						end
+						return container:GetData()
+					end
+	
+					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
+					Settings.CreateDropDown(category, setting, GetOptions, desc)
+					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValue(value)
 
 				elseif v.type == "multiselect" then
 					-- TODO
@@ -388,7 +388,7 @@ end
 -- @param category The reference to the root category registered into the Interface Options.
 -- @param layout The reference to the root category's layout
 local function FeedToBlizPanel(appName, category, layout)
-    local app = reg:GetOptionsTable(appName)
+	local app = reg:GetOptionsTable(appName)
 	if not app then
 		error(("%s isn't registed with AceConfigRegistry, unable to open config"):format(appName), 2)
 	end
