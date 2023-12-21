@@ -5,7 +5,7 @@
 local LibStub = LibStub
 local reg = LibStub("AceConfigRegistry-3.0")
 
-local MAJOR, MINOR = "BlizzConfigDialog-1.0", 2
+local MAJOR, MINOR = "BlizzConfigDialog-1.0", 3
 local BlizzConfigDialog = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not BlizzConfigDialog then return end
