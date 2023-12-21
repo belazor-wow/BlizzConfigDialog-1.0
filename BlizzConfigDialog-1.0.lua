@@ -350,19 +350,20 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					setting:SetValue(value)
 
 				elseif v.type == "range" then
+					local value = GetOptionsMemberValue("get", v, options, path, appName)
+					local desc = GetOptionsMemberValue("desc", v, options, path, appName)
 					local defaultValue = tonumber(GetOptionsMemberValue("defaultValue", v, options, path, appName))
-					local setting = Settings.RegisterProxySetting(category, "PROXY_" .. k, Settings.DefaultVarLocation,
-						Settings.VarType.Number, name, defaultValue, v.get, v.set);
-
 					local minValue = GetOptionsMemberValue("min", v, options, path, appName)
 					local maxValue = GetOptionsMemberValue("max", v, options, path, appName)
 					local step = GetOptionsMemberValue("step", v, options, path, appName)
-					local desc = GetOptionsMemberValue("desc", v, options, path, appName)
 
+					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
 					local sliderOptions = Settings.CreateSliderOptions(minValue, maxValue, step);
 
 					sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
 					Settings.CreateSlider(category, setting, sliderOptions, desc);
+					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValue(value)
 
 				elseif v.type == "select" then
 					local value = GetOptionsMemberValue("get", v, options, path, appName)
