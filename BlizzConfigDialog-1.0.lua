@@ -5,7 +5,7 @@
 local LibStub = LibStub
 local reg = LibStub("AceConfigRegistry-3.0")
 
-local MAJOR, MINOR = "BlizzConfigDialog-1.0", 1
+local MAJOR, MINOR = "BlizzConfigDialog-1.0", 2
 local BlizzConfigDialog = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not BlizzConfigDialog then return end
@@ -76,6 +76,7 @@ local isInherited = {
 local stringIsLiteral = {
 	name = true,
 	desc = true,
+	action = true,
 	icon = true,
 	usage = true,
 	width = true,
@@ -258,6 +259,15 @@ local function CheckOptionHidden(option, options, path, appName)
 	return GetOptionsMemberValue("hidden", option, options, path, appName)
 end
 
+---@param minValue number
+---@param maxValue number
+---@return number|function
+local function GetFormatter1to10(minValue, maxValue)
+	return function(value)
+		return RoundToSignificantDigits(((value-minValue)/(maxValue-minValue) * 9) + 1, 1)
+	end
+end
+
 --- Feed the given options to the Blizzard settings panel
 --
 -- @param appName The application name as given to `:RegisterOptionsTable()`
@@ -316,12 +326,15 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 				end
 			else
 				local function OnSettingChanged(_, setting, val)
-					local variable = setting:GetVariable()
 					v.set(setting, val);
 				end
 
 				if v.type == "execute" then
-					-- TODO
+					local buttonName = GetOptionsMemberValue("buttonName", v, options, path, appName)
+					local desc = GetOptionsMemberValue("desc", v, options, path, appName)
+					local addSearchTags = true;
+					local initializer = CreateSettingsButtonInitializer(name, buttonName or name, v.func, desc, addSearchTags);
+					layout:AddInitializer(initializer);
 
 				elseif v.type == "input" then
 					-- TODO
@@ -337,7 +350,19 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					setting:SetValue(value)
 
 				elseif v.type == "range" then
-					-- TODO
+					local defaultValue = tonumber(GetOptionsMemberValue("defaultValue", v, options, path, appName))
+					local setting = Settings.RegisterProxySetting(category, "PROXY_" .. k, Settings.DefaultVarLocation,
+						Settings.VarType.Number, name, defaultValue, v.get, v.set);
+
+					local minValue = GetOptionsMemberValue("min", v, options, path, appName)
+					local maxValue = GetOptionsMemberValue("max", v, options, path, appName)
+					local step = GetOptionsMemberValue("step", v, options, path, appName)
+					local desc = GetOptionsMemberValue("desc", v, options, path, appName)
+
+					local sliderOptions = Settings.CreateSliderOptions(minValue, maxValue, step);
+
+					sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
+					Settings.CreateSlider(category, setting, sliderOptions, desc);
 
 				elseif v.type == "select" then
 					local value = GetOptionsMemberValue("get", v, options, path, appName)
@@ -352,7 +377,7 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 						end
 						return container:GetData()
 					end
-	
+
 					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
 					Settings.CreateDropDown(category, setting, GetOptions, desc)
 					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
@@ -365,7 +390,15 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					-- TODO
 
 				elseif v.type == "keybinding" then
-					-- TODO
+					local action = GetOptionsMemberValue("action", v, options, path, appName);
+					assert(action ~= "" and action ~= nil)
+
+					local bindingIndex = C_KeyBindings.GetBindingIndex(action);
+					assert(bindingIndex ~= nil)
+
+					local initializer = CreateKeybindingEntryInitializer(bindingIndex, true);
+					initializer:AddSearchTags(GetBindingName(action));
+					layout:AddInitializer(initializer);
 
 				elseif v.type == "header" then
 					layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(name));
