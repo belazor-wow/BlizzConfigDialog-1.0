@@ -345,7 +345,7 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					local defaultValue = GetOptionsMemberValue("defaultValue", v, options, path, appName)
 
 					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
-					Settings.CreateCheckBox(category, setting, desc)
+					Settings.CreateCheckbox(category, setting, desc)
 					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
 					setting:SetValue(value)
 
@@ -380,7 +380,7 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					end
 
 					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
-					Settings.CreateDropDown(category, setting, GetOptions, desc)
+					Settings.CreateDropdown(category, setting, GetOptions, desc)
 					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
 					setting:SetValue(value)
 
