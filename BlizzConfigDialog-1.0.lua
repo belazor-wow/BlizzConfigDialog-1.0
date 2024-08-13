@@ -5,7 +5,7 @@
 local LibStub = LibStub
 local reg = LibStub("AceConfigRegistry-3.0")
 
-local MAJOR, MINOR = "BlizzConfigDialog-1.0", 3
+local MAJOR, MINOR = "BlizzConfigDialog-1.0", 4
 local BlizzConfigDialog = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not BlizzConfigDialog then return end
@@ -325,7 +325,9 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					FeedOptions(appName, options, path, v, category, layout, false)
 				end
 			else
-				local function OnSettingChanged(_, setting, val)
+				local function SetValue() end
+
+				local function OnSettingChanged(setting, val)
 					v.set(setting, val);
 				end
 
@@ -344,9 +346,9 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					local desc = GetOptionsMemberValue("desc", v, options, path, appName)
 					local defaultValue = GetOptionsMemberValue("defaultValue", v, options, path, appName)
 
-					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
+					local setting = Settings.RegisterProxySetting(category, k, type(defaultValue), name, defaultValue, v.get, SetValue)
 					Settings.CreateCheckbox(category, setting, desc)
-					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValueChangedCallback(OnSettingChanged)
 					setting:SetValue(value)
 
 				elseif v.type == "range" then
@@ -357,12 +359,12 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 					local maxValue = GetOptionsMemberValue("max", v, options, path, appName)
 					local step = GetOptionsMemberValue("step", v, options, path, appName)
 
-					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
+					local setting = Settings.RegisterProxySetting(category, k, type(defaultValue), name, defaultValue, v.get, SetValue)
 					local sliderOptions = Settings.CreateSliderOptions(minValue, maxValue, step);
 
 					sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
 					Settings.CreateSlider(category, setting, sliderOptions, desc);
-					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValueChangedCallback(OnSettingChanged)
 					setting:SetValue(value)
 
 				elseif v.type == "select" then
@@ -379,9 +381,9 @@ local function FeedOptions(appName, options, path, group, category, layout, isRo
 						return container:GetData()
 					end
 
-					local setting = Settings.RegisterAddOnSetting(category, name, k, type(defaultValue), defaultValue)
+					local setting = Settings.RegisterProxySetting(category, k, type(defaultValue), name, defaultValue, v.get, SetValue)
 					Settings.CreateDropdown(category, setting, GetOptions, desc)
-					Settings.SetOnValueChangedCallback(k, OnSettingChanged)
+					setting:SetValueChangedCallback(OnSettingChanged)
 					setting:SetValue(value)
 
 				elseif v.type == "multiselect" then
